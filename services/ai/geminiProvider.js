@@ -1,19 +1,18 @@
 /**
- * geminiProvider.js - Google Gemini AI Provider implementation
+ * geminiProvider.js - Google Gemini AI Provider implementation using modern @google/genai SDK
  */
 
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenAI } = require('@google/genai');
 
 function sanitizeText(text) {
     if (!text) return '';
-    // Mask sensitive keys/credentials if accidentally present
     return text.replace(/(AIzaSy[a-zA-Z0-9_-]{33})|(gsk_[a-zA-Z0-9_-]{32,})/g, '[REDACTED_API_KEY]');
 }
 
 class GeminiProvider {
     constructor() {
         this.name = 'Gemini';
-        this.modelName = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+        this.modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
     }
 
     isAvailable() {
@@ -26,16 +25,11 @@ class GeminiProvider {
             throw new Error('GEMINI_API_KEY is not set');
         }
 
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({
-            model: process.env.GEMINI_MODEL || this.modelName,
-            systemInstruction: systemInstruction || undefined,
-        });
+        const ai = new GoogleGenAI({ apiKey });
+        const targetModel = process.env.GEMINI_MODEL || this.modelName;
 
-        // Format history for Gemini chat if provided
         const contents = [];
         if (Array.isArray(history) && history.length > 0) {
-            // Take up to last 10 turns to avoid unbounded token consumption
             const recentHistory = history.slice(-10);
             for (const h of recentHistory) {
                 contents.push({
@@ -45,19 +39,20 @@ class GeminiProvider {
             }
         }
 
-        // Truncate prompt to safe character count (max 4000 chars)
         const truncatedPrompt = prompt.length > 4000 ? prompt.slice(0, 4000) + '...[truncated]' : prompt;
         contents.push({ role: 'user', parts: [{ text: truncatedPrompt }] });
 
-        const result = await model.generateContent({
+        const response = await ai.models.generateContent({
+            model: targetModel,
             contents,
-            generationConfig: {
+            config: {
                 maxOutputTokens: maxTokens,
                 temperature: 0.7,
+                systemInstruction: systemInstruction || undefined,
             }
         });
 
-        const responseText = result?.response?.text();
+        const responseText = response?.text;
         if (!responseText) {
             throw new Error('Empty response received from Gemini API');
         }

@@ -24,7 +24,7 @@
   "private": true,
   "type": "commonjs",
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
+    "@google/genai": "^2.24.0",
     "axios": "^1.7.9",
     "better-sqlite3": "^12.10.0",
     "dotenv": "^16.6.1",
