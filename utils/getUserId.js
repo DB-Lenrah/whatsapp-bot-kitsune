@@ -5,7 +5,6 @@ const MAPPINGS_FILE = path.join(__dirname, '..', 'data', 'lid_mappings.json');
 let lidToPhoneMap = {};
 let phoneToLidMap = {};
 
-// Ensure directory exists
 const dataDir = path.dirname(MAPPINGS_FILE);
 if (!fs.existsSync(dataDir)) {
     try {
@@ -13,7 +12,6 @@ if (!fs.existsSync(dataDir)) {
     } catch (e) {}
 }
 
-// Auto-load on startup
 function loadMappingsFromFile() {
     try {
         if (fs.existsSync(MAPPINGS_FILE)) {
@@ -63,8 +61,7 @@ function getLidFromPhone(phone) {
 }
 
 /**
- * Returns a clean user identifier.
- * Crucially preserves valid @lid identifiers without converting them into fake phone numbers.
+ * Returns a clean user identifier without destroying valid @lid identifiers or forcing string replacement.
  */
 function getUserId(contact) {
     if (!contact) return '';
@@ -82,7 +79,6 @@ function getUserId(contact) {
         if (phoneNumber && phoneNumber !== rawId) {
             registerMapping(rawId, phoneNumber);
         }
-        // Return raw LID ID cleanly, do not fabricate fake phone JID
         return rawId;
     }
     
