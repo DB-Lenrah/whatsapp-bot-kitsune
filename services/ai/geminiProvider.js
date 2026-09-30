@@ -12,7 +12,7 @@ function sanitizeText(text) {
 class GeminiProvider {
     constructor() {
         this.name = 'Gemini';
-        this.modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+        this.modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
     }
 
     isAvailable() {
